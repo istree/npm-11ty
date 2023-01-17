@@ -14,7 +14,7 @@ module.exports = eleventy;
 ### slice
 latest 10 posts
 ```liquid
-{% assign latest10Posts = collections['blog'] | reverse | slice : "0", "10" %}
+{% assign latest10Posts = collections['blog'] | reverse | slice : '0', '10' %}
 ```
 
 ### keys
@@ -36,7 +36,7 @@ Apply condition to collections
 {% assign pageList = collections['11ty']
 | filter: 'data.type', '==', 'docs'
 | filter: 'fileSlug', '!=', '11ty'
-| sortByProp : "data.title"
+| sortByProp : 'data.title'
 %}
 ```
 
@@ -64,7 +64,7 @@ Apply condition to collections
 
 ### sortByProp
 ```liquid
-{% assign postList = collections[tag] | sortByProp : "data.title" %}
+{% assign postList = collections[tag] | sortByProp : 'data.title' %}
 ```
 
 ### groupBy
