@@ -12,6 +12,10 @@
     "type": "git",
     "url": "https://github.com/istree/npm-11ty"
   },
+  "keywords": [
+    "11ty",
+    "filter"
+  ],
 
   "dependencies": {
     "@istree/util": "^1.0.0",
