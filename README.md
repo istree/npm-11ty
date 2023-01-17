@@ -9,7 +9,6 @@ function eleventy(config) {
     }
 }
 module.exports = eleventy;
-
 ```
 
 ### slice

@@ -8,6 +8,10 @@
   },
   "author": "GEON JU",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/istree/npm-11ty"
+  },
 
   "dependencies": {
     "@istree/util": "^1.0.0",
