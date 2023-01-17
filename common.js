@@ -1,10 +1,10 @@
 const util = require("@istree/util");
 
-var exports = {
-    valuePath : valuePath,
-    groupedList : groupedList,
-    comparePath : comparePath,
-    compareString : compareString
+let common = {
+    valuePath,
+    groupedList,
+    comparePath,
+    compareString
 };
 
 function comparePath(path, a, b, compareFunction) {
@@ -19,15 +19,15 @@ function compareString(a, b) {
 }
 
 function valuePath(target, path) {
-    var args = path.split('.');
-    var abc = args.reduce( function( result, arg) {
+    let args = path.split('.');
+    let abc = args.reduce( function( result, arg) {
         return util.notUndefined(result[arg]) ? result[arg] : undefined;
     }, target);
     return abc;
 }
 
 function groupedList() {
-    var data = [];
+    let data = [];
 
     function isEmpty() {
         return (data.length < 1);
@@ -38,7 +38,7 @@ function groupedList() {
     }
 
     function get(key) {
-        var item = find(data, key);
+        let item = find(data, key);
         if (util.isUndefined(item)) {
             item = newItem(key);
             data.push(item);
@@ -47,7 +47,7 @@ function groupedList() {
     }
 
     function newItem(key) {
-        var item = {};
+        let item = {};
         item.name = key;
         item.values = [];
         return item;
@@ -58,11 +58,11 @@ function groupedList() {
     }
 
     return {
-        get: get,
-        push: push,
-        isEmpty: isEmpty,
-        data: data
+        get,
+        push,
+        isEmpty,
+        data
     }
 }
 
-module.exports = exports;
+module.exports = common;

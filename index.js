@@ -2,37 +2,37 @@ const common = require("./common");
 const util = require('@istree/util');
 const { DateTime } = require("luxon");
 
-var filterMap = {
+let filterMap = {
     // Object
-    'keys': keys,
+    keys,
 
     // Array
-    'slice': slice,
-    'concat' : concat,
-    'filter' : filter,
+    slice,
+    concat,
+    filter,
 
     // String
-    'normalize': normalize,
-    'removeHyphen': removeHyphen,
+    normalize,
+    removeHyphen,
 
     // Date Time
-    'dateTime' : dateTime,
+    dateTime,
 
     // Sort
-    'sort': sort,
-    'sortByProp': sortByProp,
+    sort,
+    sortByProp,
 
     // Group By
-    'groupBy': groupBy,
+    groupBy,
 
     // Domain Logic
-    'tagList': tagList,
-    'defaultTitle' : defaultTitle,
-    'defaultPageTitle': defaultPageTitle,
+    tagList,
+    defaultTitle,
+    defaultPageTitle,
 
     // Debug
-    'print' : print,
-    'printCollections': printCollections,
+    print,
+    printCollections,
 };
 
 // Basic
@@ -44,20 +44,20 @@ function keys(obj) {
 
 // Array slice
 function slice(target) {
-    var params = Array.prototype.slice.call(arguments, 1);
+    let params = Array.prototype.slice.call(arguments, 1);
     return Array.prototype.slice.apply(target, params);
 }
 
 // Array concat
 function concat(str) {
-    var params = Array.prototype.slice.call(arguments, 1);
+    let params = Array.prototype.slice.call(arguments, 1);
     return String.prototype.concat.apply(str, params)
 }
 
 // Array filter
 function filter(collections, propPath, condition, value) {
-    var result = collections.filter( function(item) {
-        var propValue = common.valuePath(item, propPath);
+    let result = collections.filter( function(item) {
+        let propValue = common.valuePath(item, propPath);
         return eval("'"+propValue + "' " + condition + " '" + value + "'");
     });
     return result;
@@ -81,7 +81,7 @@ function dateTime(value, format) {
 
 // Sort collections
 function sort(collections) {
-    var compareFunction = new Intl.Collator('en').compare;
+    let compareFunction = new Intl.Collator('en').compare;
     let copied = collections.slice()
     copied.sort(compareFunction);
     return copied;
@@ -89,8 +89,8 @@ function sort(collections) {
 
 // Sort collections form properties
 function sortByProp(collections, propPath) {
-    var compareFunction = new Intl.Collator('en').compare;
-    var copied = collections.slice();
+    let compareFunction = new Intl.Collator('en').compare;
+    let copied = collections.slice();
     copied.sort( function(a,b) {
         return common.comparePath(propPath, a, b, compareFunction);
     });
@@ -99,10 +99,10 @@ function sortByProp(collections, propPath) {
 
 // Group By
 function groupBy(target, prop, filter /* params */) {
-    var filterParams = Array.prototype.slice.call(arguments, 3);
-    var result = common.groupedList();
+    let filterParams = Array.prototype.slice.call(arguments, 3);
+    let result = common.groupedList();
     target.map( function(item) {
-        var propValue = common.valuePath(item, prop);
+        let propValue = common.valuePath(item, prop);
         if (util.notUndefined(propValue)) {
             propValue = applyFilter(filterMap, filter, [propValue].concat(filterParams) );
             result.push(propValue, item)
@@ -148,7 +148,7 @@ function printCollections(target) {
     util.forObject( target, function(tag, key) {
         console.log(key+":");
         tag.map(function(tagItem) {
-            var assignedTagItem = Object.assign({}, tagItem)
+            let assignedTagItem = Object.assign({}, tagItem)
             assignedTagItem.template = "";
             assignedTagItem._templateContent = "";
             assignedTagItem.templateContent = "";
@@ -170,7 +170,4 @@ function printGroupedList(groupedList) {
     });
 }
 
-function custom(config) {
-    return filterMap;
-}
-module.exports = custom;
+module.exports = filterMap;

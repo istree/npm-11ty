@@ -3,7 +3,7 @@
 ### Apply Filters
 ```js
 function eleventy(config) {
-    const filters = require('@istree/11ty')();
+    const filters = require('@istree/11ty');
     for(let key in filters) {
         config.addFilter(key, filters[key]);
     }
@@ -28,6 +28,16 @@ latest 10 posts
     {% assign aHref = '/tags/' | concat : tag, '/' %}
     <a href="{{ aHref }}" rel="permalink">{{ tag }}</a></br>
 {% endfor %}
+```
+
+### filter
+Apply condition to collections
+```liquid
+{% assign pageList = collections['11ty']
+| filter: 'data.type', '==', 'docs'
+| filter: 'fileSlug', '!=', '11ty'
+| sortByProp : "data.title"
+%}
 ```
 
 ### normalize
