@@ -2,10 +2,14 @@
 
 ### Apply Filters
 ```js
-let filters = require('@istree/11ty')();
-for(let key in filters) {
-    config.addFilter(key, filters[key]);
+function eleventy(config) {
+    const filters = require('@istree/11ty')();
+    for(let key in filters) {
+        config.addFilter(key, filters[key]);
+    }
 }
+module.exports = eleventy;
+
 ```
 
 ### slice
