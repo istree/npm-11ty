@@ -1,6 +1,6 @@
 {
   "name": "@istree/11ty",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "11ty tools",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,6 @@
     "11ty",
     "filter"
   ],
-
   "dependencies": {
     "@istree/util": "^1.0.0",
     "luxon": "^3.1.1"
