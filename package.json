@@ -14,7 +14,9 @@
   },
   "keywords": [
     "11ty",
-    "filter"
+    "eleventy",
+    "filter",
+    "groupBy"
   ],
   "dependencies": {
     "@istree/util": "^1.0.0",
