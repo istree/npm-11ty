@@ -104,7 +104,9 @@ function groupBy(target, prop, filter /* params */) {
     target.map( function(item) {
         let propValue = common.valuePath(item, prop);
         if (util.notUndefined(propValue)) {
-            propValue = applyFilter(filterMap, filter, [propValue].concat(filterParams) );
+            if ( util.notUndefined(filter) ) {
+                propValue = applyFilter(filterMap, filter, [propValue].concat(filterParams) );
+            }
             result.push(propValue, item)
         }
     });
