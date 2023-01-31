@@ -7,6 +7,7 @@ let filterMap = {
     keys,
 
     // Array
+    reverse,
     slice,
     concat,
     filter,
@@ -24,6 +25,7 @@ let filterMap = {
 
     // Group By
     groupBy,
+    groupByExt,
 
     // Domain Logic
     tagList,
@@ -33,7 +35,12 @@ let filterMap = {
     // Debug
     print,
     printCollections,
+
+    // Util
+    init
 };
+
+let eleventyConfig = {};
 
 // Basic
 
@@ -42,15 +49,21 @@ function keys(obj) {
     return Object.keys(obj);
 }
 
+// Array reverse
+function reverse(target) {
+    let params = util.params(arguments, 1);
+    return Array.prototype.reverse.apply(target, params);
+}
+
 // Array slice
 function slice(target) {
-    let params = Array.prototype.slice.call(arguments, 1);
+    let params = util.params(arguments, 1);
     return Array.prototype.slice.apply(target, params);
 }
 
 // Array concat
 function concat(str) {
-    let params = Array.prototype.slice.call(arguments, 1);
+    let params = util.params(arguments, 1);
     return String.prototype.concat.apply(str, params)
 }
 
@@ -58,9 +71,15 @@ function concat(str) {
 function filter(collections, propPath, condition, value) {
     let result = collections.filter( function(item) {
         let propValue = common.valuePath(item, propPath);
-        return eval("'"+propValue + "' " + condition + " '" + value + "'");
+        return eval(stringSequence(propValue) + condition + stringSequence(value) );
     });
     return result;
+}
+
+function stringSequence(value) {
+    return util.isString(value)
+    ? "'" + value + "'"
+    : value;
 }
 
 // String
@@ -73,8 +92,9 @@ function removeHyphen(dateObj) {
 }
 
 // Date Time
-function dateTime(value, format) {
-    return DateTime.fromJSDate(value).toFormat(format);
+function dateTime(value, format, toNumber) {
+    let result = DateTime.fromJSDate(value).toFormat(format);
+    return toNumber ? Number(result) : result;
 }
 
 // Complex
@@ -82,7 +102,7 @@ function dateTime(value, format) {
 // Sort collections
 function sort(collections) {
     let compareFunction = new Intl.Collator('en').compare;
-    let copied = collections.slice()
+    let copied = collections.slice();
     copied.sort(compareFunction);
     return copied;
 }
@@ -98,15 +118,97 @@ function sortByProp(collections, propPath) {
 }
 
 // Group By
-function groupBy(target, prop, filter /* params */) {
-    let filterParams = Array.prototype.slice.call(arguments, 3);
+function groupBy(target, prop, propFilter /* params */) {
+    let propFilterParams = util.params(arguments, 3);
+    let action = function(target) {
+        return groupByProp(target, prop, propFilter, propFilterParams);
+    }
+
+    return groupByStart( target, action);
+}
+
+function groupByExt(target, propMethod, sortMethod) {
+    let sortMethodParamsList = util.params(arguments, 2);
+
+    let action = function(target) {
+        return groupByPropAndSort(target, propMethod, sortMethodParamsList);
+    }
+
+    return groupByStart( target, action);
+}
+
+function groupByStart(target, action) {
+    if ( util.isUndefined(target.grouped) ) {
+        let result = action(target); // new group
+        result.grouped = true; // initialize grouped flag
+        return result;
+    } else {
+        groupByValues(target, action);
+        return target;
+    }
+}
+
+function groupByValues(target, action) {
+    for( let x = 0; x < target.length; x++ ){
+        let item = target[x];
+        if ( util.notUndefined(item.values) ) {
+            let result = groupByValues(item.values, action);
+            if ( util.notUndefined(result)) {
+                item.values = result;
+            }
+        }  else {
+            return action(target);
+        }
+    }
+
+    return undefined; // parents return undefined;
+}
+
+function groupByPropAndSort(target, propMethodParams, sortMethodParamsList) {
+
+    function main() {
+        let  resultData = [];
+
+        let propMethod = eval(propMethodParams);
+        if (util.notUndefined(propMethod)) {
+            resultData = applyGroupBy(target, propMethod);
+        }
+
+        sortMethodParamsList.forEach( function(sortMethodParams) {
+            let sortMethod = eval(sortMethodParams);
+            if (util.notUndefined(sortMethod)) {
+                let appliedResultData = applySortMethod(resultData, sortMethod)
+                if (util.notUndefined(appliedResultData)) {
+                    resultData = appliedResultData;
+                }
+            }
+        });
+
+        return resultData;
+    }
+
+    function applyGroupBy(target, propMethod) {
+        let prop = propMethod[0];
+        let propFilter = propMethod[1];
+        let propFilterParams = util.params(propMethod, 2);
+        return groupByProp(target, prop, propFilter, propFilterParams);
+    }
+
+    function applySortMethod(target, sortMethod) {
+        let sortFilter = sortMethod[0];
+        let sortFilterParams = util.params(sortMethod, 1);
+        return applyFilter(sortFilter, [target].concat(sortFilterParams))
+    }
+
+    return main();
+}
+
+function groupByProp(target, prop, filter, propFilterParams) {
     let result = common.groupedList();
     target.map( function(item) {
         let propValue = common.valuePath(item, prop);
         if (util.notUndefined(propValue)) {
-            if ( util.notUndefined(filter) ) {
-                propValue = applyFilter(filterMap, filter, [propValue].concat(filterParams) );
-            }
+            propValue = applyFilter(filter, [propValue].concat(propFilterParams) );
             result.push(propValue, item)
         }
     });
@@ -114,9 +216,10 @@ function groupBy(target, prop, filter /* params */) {
     return result.data;
 }
 
-function applyFilter(filterMap, filter, params) {
-    if (util.isOwnProperty(filterMap, filter)) {
-        return filterMap[filter].apply(null, params);
+function applyFilter(filter, params) {
+    let filterAct = getFilter(filter);
+    if (util.notUndefined(filterAct)) {
+        return filterAct.apply(null, params);
     }
 }
 
@@ -170,6 +273,24 @@ function printGroupedList(groupedList) {
             console.log(value.data.page);
         });
     });
+}
+
+// util
+function init(config) {
+    for(let key in filterMap) {
+        if (filterMap[key].name !== init.name) {
+            config.addFilter(key, filterMap[key]);
+        }
+    }
+
+    eleventyConfig = config;
+}
+
+function getFilter(filter) {
+    return (
+    filterMap[filter] ||
+    config.getFilter(filter)
+    );
 }
 
 module.exports = filterMap;

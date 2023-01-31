@@ -4,6 +4,14 @@
 ```js
 function eleventy(config) {
     const filters = require('@istree/11ty');
+    filters.init(config);
+}
+```
+
+same as
+```js
+function eleventy(config) {
+    const filters = require('@istree/11ty');
     for(let key in filters) {
         config.addFilter(key, filters[key]);
     }
@@ -81,7 +89,33 @@ nested loop
     {% for postsEachMonth in postsByMonth %}
         <h2>{{ postsEachMonth.name }}</h2>
         {% for post in postsEachMonth.values %}
-            <a href="{{ post.url }}" rel="permalink">{{ post.title }}</a><br/>
+            <a href="{{ post.url }}" rel="permalink">{{ post.fileSlug }}</a><br/>
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+```
+
+### groupByExt
+post by year
+```liquid
+{% assign postsByYearGroup = collections['blog']
+| groupByExt: "['date', 'dateTime', 'y' ]", "['reverse']"
+| groupByExt: "['date', 'dateTime', 'M' ]", "['reverse']"
+| groupByExt: "['date', 'dateTime', 'd' ]", "['reverse']"
+%}
+```
+
+nested loop
+```liquid
+{% for postsByYear in postsByYearGroup %}
+    <h1>{{ postsByYear.name }} Year</h1>
+    {% for postsByMonth in postsByYear.values %}
+        <h2>{{ postsByMonth.name }} Month</h2>
+        {% for postsByDay in postsByMonth.values %}
+            <h3>{{ postsByDay.name }} Day</h3>
+            {% for post in postsByDay.values %}
+                <a href="{{ post.url }}" rel="permalink">{{ post.fileSlug }}</a><br/>
+            {% endfor %}
         {% endfor %}
     {% endfor %}
 {% endfor %}
