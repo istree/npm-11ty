@@ -51,8 +51,9 @@ function keys(obj) {
 
 // Array reverse
 function reverse(target) {
-    let params = util.params(arguments, 1);
-    return Array.prototype.reverse.apply(target, params);
+    let copied = target.slice();
+    const params = util.params(arguments, 1);
+    return Array.prototype.reverse.apply(copied, params);
 }
 
 // Array slice
