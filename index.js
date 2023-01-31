@@ -175,7 +175,12 @@ function groupByPropAndSort(target, propMethodParams, sortMethodParamsList) {
             resultData = applyGroupBy(target, propMethod);
         }
 
-        sortMethodParamsList.forEach( function(sortMethodParams) {
+        for( let x = 0; x < sortMethodParamsList.length; x++) {
+            let sortMethodParams = sortMethodParamsList[x];
+            if (util.isUndefined(sortMethodParams) ) {
+                break;
+            }
+
             let sortMethod = eval(sortMethodParams);
             if (util.notUndefined(sortMethod)) {
                 let appliedResultData = applySortMethod(resultData, sortMethod)
@@ -183,7 +188,7 @@ function groupByPropAndSort(target, propMethodParams, sortMethodParamsList) {
                     resultData = appliedResultData;
                 }
             }
-        });
+        }
 
         return resultData;
     }
