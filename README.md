@@ -101,7 +101,7 @@ post by year
 {% assign postsByYearGroup = collections['blog']
 | groupByExt: "['date', 'dateTime', 'y' ]", "['reverse']"
 | groupByExt: "['date', 'dateTime', 'M' ]", "['reverse']"
-| groupByExt: "['date', 'dateTime', 'd' ]", "['reverse']"
+| eachValues: "['reverse']"
 %}
 ```
 
@@ -110,16 +110,12 @@ nested loop
 {% for postsByYear in postsByYearGroup %}
     <h1>{{ postsByYear.name }} Year</h1>
     {% for postsByMonth in postsByYear.values %}
-        <h2>{{ postsByMonth.name }} Month</h2>
-        {% for postsByDay in postsByMonth.values %}
-            <h3>{{ postsByDay.name }} Day</h3>
-            {% for post in postsByDay.values %}
-                <a href="{{ post.url }}" rel="permalink">{{ post.fileSlug }}</a><br/>
-            {% endfor %}
+    <h2>{{ postsByMonth.name }} Month</h2>
+        {% for post in postsByMonth.values %}
+            <a href="{{ post.url }}" rel="permalink">{{ post.fileSlug }}</a><br/>
         {% endfor %}
     {% endfor %}
-{% endfor %}
-```
+{% endfor %}```
 
 ### defaultTitle
 ```json

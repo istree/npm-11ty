@@ -10,6 +10,7 @@ let filterMap = {
     reverse,
     slice,
     concat,
+    prepend,
     filter,
 
     // String
@@ -26,6 +27,8 @@ let filterMap = {
     // Group By
     groupBy,
     groupByExt,
+    eachName,
+    eachValues,
 
     // Domain Logic
     tagList,
@@ -65,7 +68,13 @@ function slice(target) {
 // Array concat
 function concat(str) {
     let params = util.params(arguments, 1);
-    return String.prototype.concat.apply(str, params)
+    return String.prototype.concat.apply(str, params);
+}
+
+// Array prepend
+function prepend(str) {
+    let params = util.params(arguments, 1);
+    return String.prototype.concat.apply(params.join(''), [str]);
 }
 
 // Array filter
@@ -121,6 +130,7 @@ function sortByProp(collections, propPath) {
 // Group By
 function groupBy(target, prop, propFilter /* params */) {
     let propFilterParams = util.params(arguments, 3);
+
     let action = function(target) {
         return groupByProp(target, prop, propFilter, propFilterParams);
     }
@@ -144,18 +154,48 @@ function groupByStart(target, action) {
         result.grouped = true; // initialize grouped flag
         return result;
     } else {
-        groupByValues(target, action);
+        applyToLeafNodes(target, "values", action);
         return target;
     }
 }
 
-function groupByValues(target, action) {
+function eachName(target) {
+    let filterParamsList = util.params(arguments, 1);
+    let action = function(name) {
+        return applyEachFilters(name, filterParamsList);
+    }
+    applyToLeafNodes(target, "name", action);
+    return target;
+}
+
+function eachValues(target) {
+    let filterParamsList = util.params(arguments, 1);
+    let action = function(values) {
+        return applyEachFilters(values, filterParamsList);
+    }
+    applyToLeafNodes(target, "values", action);
+    return target;
+}
+
+function applyEachFilters(target, filterParamsList) {
+    let result = target;
+    for( let x = 0; x < filterParamsList.length; x++) {
+        let filterParamsString = filterParamsList[x];
+        let filterParams = eval(filterParamsString);
+        let filter = filterParams[0];
+        let params = util.params(filterParams, 1);
+        result = applyFilter(filter, [result].concat(params));
+    }
+    return result;
+}
+
+function applyToLeafNodes(target, key, action) {
     for( let x = 0; x < target.length; x++ ){
         let item = target[x];
-        if ( util.notUndefined(item.values) ) {
-            let result = groupByValues(item.values, action);
+        if ( util.notUndefined(item[key]) ) {
+            let result = applyToLeafNodes(item[key], key, action);
             if ( util.notUndefined(result)) {
-                item.values = result;
+                item[key] = result;
             }
         }  else {
             return action(target);
@@ -166,47 +206,15 @@ function groupByValues(target, action) {
 }
 
 function groupByPropAndSort(target, propMethodParams, sortMethodParamsList) {
+    let  result = [];
 
-    function main() {
-        let  resultData = [];
-
-        let propMethod = eval(propMethodParams);
-        if (util.notUndefined(propMethod)) {
-            resultData = applyGroupBy(target, propMethod);
-        }
-
-        for( let x = 0; x < sortMethodParamsList.length; x++) {
-            let sortMethodParams = sortMethodParamsList[x];
-            if (util.isUndefined(sortMethodParams) ) {
-                break;
-            }
-
-            let sortMethod = eval(sortMethodParams);
-            if (util.notUndefined(sortMethod)) {
-                let appliedResultData = applySortMethod(resultData, sortMethod)
-                if (util.notUndefined(appliedResultData)) {
-                    resultData = appliedResultData;
-                }
-            }
-        }
-
-        return resultData;
+    let propMethod = eval(propMethodParams);
+    if (util.notUndefined(propMethod)) {
+        result = applyGroupBy(target, propMethod);
     }
 
-    function applyGroupBy(target, propMethod) {
-        let prop = propMethod[0];
-        let propFilter = propMethod[1];
-        let propFilterParams = util.params(propMethod, 2);
-        return groupByProp(target, prop, propFilter, propFilterParams);
-    }
-
-    function applySortMethod(target, sortMethod) {
-        let sortFilter = sortMethod[0];
-        let sortFilterParams = util.params(sortMethod, 1);
-        return applyFilter(sortFilter, [target].concat(sortFilterParams))
-    }
-
-    return main();
+    result = applyEachFilters(result, sortMethodParamsList);
+    return result;
 }
 
 function groupByProp(target, prop, filter, propFilterParams) {
@@ -220,6 +228,13 @@ function groupByProp(target, prop, filter, propFilterParams) {
     });
     // printGroupedList(groupedList);
     return result.data;
+}
+
+function applyGroupBy(target, propMethod) {
+    let prop = propMethod[0];
+    let propFilter = propMethod[1];
+    let propFilterParams = util.params(propMethod, 2);
+    return groupByProp(target, prop, propFilter, propFilterParams);
 }
 
 function applyFilter(filter, params) {
@@ -295,7 +310,7 @@ function init(config) {
 function getFilter(filter) {
     return (
     filterMap[filter] ||
-    config.getFilter(filter)
+    eleventyConfig.getFilter(filter)
     );
 }
 
