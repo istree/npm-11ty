@@ -35,6 +35,10 @@ let filterMap = {
     defaultTitle,
     defaultPageTitle,
 
+    // URL
+    dir,
+    dirSlash,
+
     // Debug
     print,
     printCollections,
@@ -228,7 +232,9 @@ function groupByProp(target, prop, filter, propFilterParams) {
     target.map( function(item) {
         let propValue = common.valuePath(item, prop);
         if (util.notUndefined(propValue)) {
-            propValue = applyFilter(filter, [propValue].concat(propFilterParams) );
+            if ( util.notUndefined(filter) ) {
+                propValue = applyFilter(filter, [propValue].concat(propFilterParams) );
+            }
             result.push(propValue, item)
         }
     });
@@ -262,6 +268,15 @@ function defaultTitle(title, fileSlug) {
 function defaultPageTitle(page) {
     let pageDataTitle = page.data ? page.data.title : undefined;
     return defaultTitle(pageDataTitle, page.fileSlug);
+}
+
+// URL
+function dir(url) {
+    return url.substr(0, url.lastIndexOf('/'));
+}
+
+function dirSlash(url) {
+    return url.substr(0, url.lastIndexOf('/') + 1);
 }
 
 // debug
