@@ -154,7 +154,7 @@ function groupByStart(target, action) {
         result.grouped = true; // initialize grouped flag
         return result;
     } else {
-        applyToLeafNodes(target, "values", action);
+        applyToLeafNodesProp(target, "values", "values", action);
         return target;
     }
 }
@@ -164,7 +164,7 @@ function eachName(target) {
     let action = function(name) {
         return applyEachFilters(name, filterParamsList);
     }
-    applyToLeafNodes(target, "name", action);
+    applyToLeafNodesProp(target, "values", "name", action);
     return target;
 }
 
@@ -173,7 +173,7 @@ function eachValues(target) {
     let action = function(values) {
         return applyEachFilters(values, filterParamsList);
     }
-    applyToLeafNodes(target, "values", action);
+    applyToLeafNodesProp(target, "values", "values", action);
     return target;
 }
 
@@ -189,20 +189,26 @@ function applyEachFilters(target, filterParamsList) {
     return result;
 }
 
-function applyToLeafNodes(target, key, action) {
+function applyToLeafNodesProp(target, key, prop, action) {
     for( let x = 0; x < target.length; x++ ){
         let item = target[x];
+
+        let isLeaf = false;
         if ( util.notUndefined(item[key]) ) {
-            let result = applyToLeafNodes(item[key], key, action);
+            isLeaf = applyToLeafNodesProp(item[key], key, prop, action);
+        } else {
+            return true; // isLeaf true;
+        }
+
+        if (isLeaf && util.notUndefined(item[prop]) ) {
+            let result = action(item[prop]);
             if ( util.notUndefined(result)) {
-                item[key] = result;
+                item[prop] = result;
             }
-        }  else {
-            return action(target);
         }
     }
 
-    return undefined; // parents return undefined;
+    return false; // not Leaf
 }
 
 function groupByPropAndSort(target, propMethodParams, sortMethodParamsList) {

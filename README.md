@@ -99,8 +99,8 @@ nested loop
 post by year
 ```liquid
 {% assign postsByYearGroup = collections['blog']
-| groupByExt: "['date', 'dateTime', 'y' ]", "['reverse']"
-| groupByExt: "['date', 'dateTime', 'M' ]", "['reverse']"
+| groupByExt: "['date', 'dateTime', 'y' ]", "['reverse']" | eachName: "['concat', ' Year']"
+| groupByExt: "['date', 'dateTime', 'M' ]", "['reverse']" | eachName: "['concat', ' Month']"
 | eachValues: "['reverse']"
 %}
 ```
@@ -108,14 +108,15 @@ post by year
 nested loop
 ```liquid
 {% for postsByYear in postsByYearGroup %}
-    <h1>{{ postsByYear.name }} Year</h1>
+    <h1>{{ postsByYear.name }}</h1>
     {% for postsByMonth in postsByYear.values %}
-    <h2>{{ postsByMonth.name }} Month</h2>
+        <h2>{{ postsByMonth.name }}</h2>
         {% for post in postsByMonth.values %}
             <a href="{{ post.url }}" rel="permalink">{{ post.fileSlug }}</a><br/>
         {% endfor %}
     {% endfor %}
-{% endfor %}```
+{% endfor %}
+```
 
 ### defaultTitle
 ```json
