@@ -1,6 +1,6 @@
 {
   "name": "@istree/11ty",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "11ty tools",
   "main": "index.js",
   "scripts": {
