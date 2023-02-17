@@ -38,6 +38,7 @@ let filterMap = {
     // URL
     dir,
     dirSlash,
+    relative_url,
 
     // Debug
     print,
@@ -277,6 +278,11 @@ function dir(url) {
 
 function dirSlash(url) {
     return url.substr(0, url.lastIndexOf('/') + 1);
+}
+
+function relative_url(url) {
+    let filter = getFilter('url');
+    return util.notUndefined(filter) ?  filter(url) : url;
 }
 
 // debug
